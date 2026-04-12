@@ -1,7 +1,7 @@
 local Services = {};
 local workspace = game:GetService('Workspace');
 local players = game:GetService('Players')
-local localPlayer = players.localPlayer
+local localPlayer = players.LocalPlayer
 local vim = getvirtualinputmanager and getvirtualinputmanager();
 
 function Services:Get(...)
