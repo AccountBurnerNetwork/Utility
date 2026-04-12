@@ -5,11 +5,11 @@ local localPlayer = players.LocalPlayer
 local vim = getvirtualinputmanager and getvirtualinputmanager();
 
 function Services:Get(...)
-    local allServices = {}
+    local ServicesTable = {}
     for _, service in next, {...} do
-        table.insert(allServices, self[service]);
+        table.insert(ServicesTable, self[service]);
     end;
-    return unpack(allServices);
+    return unpack(ServicesTable);
 end;
 
 setmetatable(Services, {
