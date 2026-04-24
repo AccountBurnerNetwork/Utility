@@ -14,18 +14,27 @@ end;
 
 setmetatable(Services, {
     __index = function(self, p)
-        if p == "VirtualInputManager" and vim then
+        if p == "VirtualInputManager" then
+            if vim then
+                return vim
+            end
+
+            local service = game:GetService("VirtualInputManager")
+            vim = cloneref and cloneref(service) or service
+            rawset(self, p, vim)
             return vim
-        elseif p == "VirtualInputManager" and not vim then
-            return game:GetService('VirtualInputManager')
+
         elseif p == "CurrentCamera" then
             return workspace.CurrentCamera
+
         elseif p == "Mouse" then
             return localPlayer:GetMouse()
         end
-        local service = game:GetService(p);
-        rawset(self, p, service);
-        return service;
+
+        local service = cloneref and cloneref(game:GetService(p)) or game:GetService(p)
+
+        rawset(self, p, service)
+        return service
     end
 })
 
