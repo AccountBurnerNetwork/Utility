@@ -1,25 +1,57 @@
-local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
 
-local Servers = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-local Server, Next = nil, nil
 local Teleports = {}
 
-function Teleports.ListServers(cursor)
-    local Raw = game:HttpGet(Servers .. ((cursor and "&cursor=" .. cursor) or ""))
-    return HttpService:JSONDecode(Raw)
-end
-
 function Teleports.Teleport()
-    repeat
-        local Servers = Teleports.ListServers(Next)
-        Server = Servers.data[math.random(1, (#Servers.data / 3))]
-        Next = Servers.nextPageCursor
-    until Server
+	local LocalPlayer = Players.LocalPlayer
+	local PlaceId = game.PlaceId
+	local JobId = game.JobId
 
-    if Server.playing < Server.maxPlayers and Server.id ~= game.JobId then
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, Server.id, game.Players.LocalPlayer)
-    end
+	while true do
+		local success, result = pcall(function()
+			local servers = {}
+
+			local req = game:HttpGet(
+				"https://games.roblox.com/v1/games/" .. PlaceId ..
+				"/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true"
+			)
+
+			local body = HttpService:JSONDecode(req)
+
+			if body and body.data then
+				for _, v in next, body.data do
+					if type(v) == "table"
+						and tonumber(v.playing)
+						and tonumber(v.maxPlayers)
+						and v.playing < v.maxPlayers
+						and v.id ~= JobId then
+
+						table.insert(servers, v.id)
+					end
+				end
+			end
+
+			if #servers > 0 then
+				local serverId = servers[math.random(1, #servers)]
+
+				TeleportService:TeleportToPlaceInstance(
+					PlaceId,
+					serverId,
+					LocalPlayer
+				)
+
+				return true
+			end
+		end)
+
+		if success and result then
+			break
+		end
+
+		task.wait(1)
+	end
 end
 
 return Teleports
