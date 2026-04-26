@@ -7,10 +7,10 @@ local Teleports = {}
 function Teleports.Teleport()
 	local LocalPlayer = Players.LocalPlayer
 	local PlaceId = game.PlaceId
-	local JobId = game.JobId
 
 	while true do
-		local success, result = pcall(function()
+		local success, err = pcall(function()
+			local JobId = game.JobId
 			local servers = {}
 
 			local req = game:HttpGet(
@@ -41,13 +41,11 @@ function Teleports.Teleport()
 					serverId,
 					LocalPlayer
 				)
-
-				return true
 			end
 		end)
 
-		if success and result then
-			break
+		if not success then
+			warn(err)
 		end
 
 		task.wait(1)
